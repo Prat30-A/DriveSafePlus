@@ -1,0 +1,14 @@
+/Debug/
+/Release/
+*.launch
+*.uvoptx
+*.uvprojx
+*.bak
+*.log
+*.tmp
+*.swp
+*.dep
+*.o
+*.d
+*.lst
+*.map
