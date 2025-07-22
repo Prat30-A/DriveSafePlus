@@ -1,14 +1,32 @@
+# STM32CubeIDE Generated Folders and Files
+*.launch
+*.bin
+*.elf
+*.hex
+*.map
+*.list
+*.log
+*.dep
+
+# Build output
 /Debug/
 /Release/
-*.launch
-*.uvoptx
-*.uvprojx
-*.bak
-*.log
-*.tmp
-*.swp
-*.dep
-*.o
-*.d
-*.lst
-*.map
+/build/
+/out/
+
+# Eclipse / STM32CubeIDE
+.settings/
+.metadata/
+.cproject
+.project
+*.sublime-workspace
+*.sublime-project
+
+# CubeMX project files (can keep .ioc, ignore others if you want)
+/*.ioc
+*.db
+*.mxproject
+
+# OS-specific
+.DS_Store
+Thumbs.db
