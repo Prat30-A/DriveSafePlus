@@ -24,6 +24,8 @@
 #include "LCD1602.h"
 #include <stdio.h>
 #include <string.h>
+#include "keypad.h"
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +61,11 @@ float speed = 0;//store a float to convert adc to speed value
 uint16_t ADC_VAL_TEMP = 0;//create a storer for the adc value again
 float temp = 0;//convert adc to temp value
 volatile uint32_t drowsy_counter = 0;
+char driver_id[6];       // 5-digit driver ID + null terminator
+int id_index = 0;        // Index for digit entry
+char user_type = 'U';    // 'T' = Teen, 'A' = Adult
+bool user_identified = false;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,6 +80,8 @@ void Read_ADC_Values(void);
 void Classify_driving(float temp_c, char* cond, char* drive);
 void Display_LCD(float temp_c,char* cond, char* drive);
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+void Run_Driving_Session(void);
+void Display_Confirmation_LCD(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -132,18 +141,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  Read_ADC_Values();
-	  char cond[32];//variable for storing the condition
-	  char drive[32];//variable storing the type of driving
-	  float temp_c = (temp - 0.5) * 100;
+	  /*
+	  if(!user_identified){
+		  user_type = Get_User_Type_From_Keypad();
+		  Get_Driver_ID_From_Keypad(driver_id);
+		  Display_Confirmation_LCD();
+		  Run_Driving_Session();
+		  user_identified = true;
+	  }
 
-	  Classify_driving(temp_c,cond,drive);
-
-	  HAL_Delay(500);//wait for 500 ms before doing the transmitting
-
-	  Display_LCD(temp_c, cond, drive);
-
-	  HAL_Delay(1250);//delay before repeating the process
+	  Run_Driving_Session();
+	  */
+		user_type = Get_User_Type_From_Keypad();         // Ask T/A every loop
+		Get_Driver_ID_From_Keypad(driver_id);            // Ask 5-digit ID
+		Display_Confirmation_LCD();                      // Show what was entered
+		HAL_Delay(1000); // optional delay for clarity
 
   }
   /* USER CODE END 3 */
@@ -582,6 +594,34 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		}
 	}
 }
+
+void Run_Driving_Session(void) {
+    Read_ADC_Values();
+    char cond[32];
+    char drive[32];
+    float temp_c = (temp - 0.5) * 100;
+
+    Classify_driving(temp_c, cond, drive);
+    HAL_Delay(500);
+    Display_LCD(temp_c, cond, drive);
+    HAL_Delay(1250);
+}
+
+void Display_Confirmation_LCD(void) {
+    lcd_clear();
+    lcd_put_cur(0, 0);
+    lcd_send_string("ID: ");
+    lcd_send_string(driver_id);
+    lcd_put_cur(1, 0);
+    if (user_type == 'T') {
+        lcd_send_string("Teen Detected");
+    } else {
+        lcd_send_string("Adult Detected");
+    }
+    HAL_Delay(2000);
+    lcd_clear();
+}
+
 /* USER CODE END 4 */
 
 /**
